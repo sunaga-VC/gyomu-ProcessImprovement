@@ -10,12 +10,20 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-const connectionString = process.env.DATABASE_URL;
-const isSupabase = /supabase\.(co|com)/i.test(connectionString);
+const rawUrl = process.env.DATABASE_URL.trim();
+const isSupabase = /supabase\.(co|com)/i.test(rawUrl);
+
+// Prefer explicit ssl object on serverless; drop sslmode from the URI to avoid
+// pg treating "require" as verify-full and failing certificate checks.
+let connectionString = rawUrl;
+if (isSupabase) {
+  const u = new URL(rawUrl);
+  u.searchParams.delete("sslmode");
+  connectionString = u.toString();
+}
 
 export const pool = new Pool({
   connectionString,
-  // Vercel (and similar) need TLS to Supabase; avoid strict CA failures on serverless.
   ssl: isSupabase ? { rejectUnauthorized: false } : undefined,
 });
 export const db = drizzle(pool, { schema });
