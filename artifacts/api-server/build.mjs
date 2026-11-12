@@ -14,8 +14,7 @@ async function buildAll() {
   const distDir = path.resolve(artifactDir, "dist");
   await rm(distDir, { recursive: true, force: true });
 
-  await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+  const shared = {
     platform: "node",
     bundle: true,
     format: "esm",
@@ -117,6 +116,17 @@ globalThis.__filename = __bannerUrl.fileURLToPath(import.meta.url);
 globalThis.__dirname = __bannerPath.dirname(globalThis.__filename);
     `,
     },
+  };
+
+  await esbuild({
+    ...shared,
+    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+  });
+
+  // Bundled Express app for Vercel serverless (no listen()).
+  await esbuild({
+    ...shared,
+    entryPoints: [path.resolve(artifactDir, "src/vercel.ts")],
   });
 }
 
