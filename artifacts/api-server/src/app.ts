@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { requireAuth } from "./middlewares/require-auth";
 
 const app: Express = express();
 
@@ -28,6 +29,15 @@ app.use(
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Health check stays public; everything else under /api requires a login JWT.
+app.use("/api", (req, res, next) => {
+  if (req.path === "/healthz" || req.path === "/healthz/") {
+    next();
+    return;
+  }
+  requireAuth(req, res, next);
+});
 
 app.use("/api", router);
 

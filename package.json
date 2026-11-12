@@ -2,15 +2,34 @@
   "name": "gyoumuhearing",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "pnpm --filter @workspace/bpims run dev",
     "dev:web": "pnpm --filter @workspace/bpims run dev",
     "dev:api": "pnpm --filter @workspace/api-server run dev",
     "dev:mockup": "pnpm --filter @workspace/mockup-sandbox run dev",
-    "typecheck": "tsc -b tsconfig.json"
+    "typecheck": "tsc -b tsconfig.json",
+    "build": "pnpm --filter @workspace/bpims run build"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.90.1",
+    "@workspace/api-server": "workspace:*",
+    "@workspace/api-zod": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "drizzle-orm": "catalog:",
+    "express": "^5.2.1",
+    "jose": "^6.1.3",
+    "pg": "^8.16.3",
+    "pino": "^9.14.0",
+    "pino-http": "^10.5.0"
   },
   "devDependencies": {
     "dotenv-cli": "^11.0.0",
     "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

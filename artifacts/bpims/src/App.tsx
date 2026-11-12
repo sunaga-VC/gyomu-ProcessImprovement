@@ -2,8 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, Redirect } from 'wouter';
+import type { ComponentType } from 'react';
 
 import { MainLayout } from '@/components/layout/MainLayout';
+import { AuthProvider, useAuth } from '@/lib/auth';
+import LoginPage from '@/pages/login';
 import Dashboard from '@/pages/dashboard';
 import Processes from '@/pages/processes';
 import ProcessDetail from '@/pages/process-detail';
@@ -32,33 +35,49 @@ const queryClient = new QueryClient({
   },
 });
 
+function RequireAuth({ component: Component }: { component: ComponentType }) {
+  const { ready, session, configured } = useAuth();
+  if (!ready) {
+    return <div className="p-8 text-sm text-slate-500">読み込み中…</div>;
+  }
+  if (configured && !session) {
+    return <Redirect to="/login" />;
+  }
+  return <Component />;
+}
+
 function Router() {
   return (
-    <MainLayout>
-      <Switch>
-        <Route path="/" component={() => <Redirect to="/dashboard" />} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/processes/tree" component={() => <Redirect to="/processes" />} />
-        <Route path="/processes" component={Processes} />
-        <Route path="/processes/:id" component={ProcessDetail} />
-        <Route path="/management-tasks" component={ManagementTasks} />
-        <Route path="/hearings/calendar" component={HearingsCalendar} />
-        <Route path="/hearings" component={Hearings} />
-        <Route path="/issues" component={Issues} />
-        <Route path="/improvements/board" component={ImprovementsBoard} />
-        <Route path="/improvements/print" component={ImprovementsPrint} />
-        <Route path="/improvements" component={Improvements} />
-        <Route path="/system-candidates/print" component={SystemCandidatesPrint} />
-        <Route path="/system-candidates" component={SystemCandidates} />
-        <Route path="/system-gantt" component={SystemGantt} />
-        <Route path="/documents" component={Documents} />
-        <Route path="/systems" component={Systems} />
-        <Route path="/divisions" component={Divisions} />
-        <Route path="/departments" component={Departments} />
-        <Route path="/users" component={Users} />
-        <Route component={() => <div className="p-8">404 Not Found</div>} />
-      </Switch>
-    </MainLayout>
+    <Switch>
+      <Route path="/login" component={LoginPage} />
+      <Route>
+        <MainLayout>
+          <Switch>
+            <Route path="/" component={() => <Redirect to="/dashboard" />} />
+            <Route path="/dashboard" component={() => <RequireAuth component={Dashboard} />} />
+            <Route path="/processes/tree" component={() => <Redirect to="/processes" />} />
+            <Route path="/processes" component={() => <RequireAuth component={Processes} />} />
+            <Route path="/processes/:id" component={() => <RequireAuth component={ProcessDetail} />} />
+            <Route path="/management-tasks" component={() => <RequireAuth component={ManagementTasks} />} />
+            <Route path="/hearings/calendar" component={() => <RequireAuth component={HearingsCalendar} />} />
+            <Route path="/hearings" component={() => <RequireAuth component={Hearings} />} />
+            <Route path="/issues" component={() => <RequireAuth component={Issues} />} />
+            <Route path="/improvements/board" component={() => <RequireAuth component={ImprovementsBoard} />} />
+            <Route path="/improvements/print" component={() => <RequireAuth component={ImprovementsPrint} />} />
+            <Route path="/improvements" component={() => <RequireAuth component={Improvements} />} />
+            <Route path="/system-candidates/print" component={() => <RequireAuth component={SystemCandidatesPrint} />} />
+            <Route path="/system-candidates" component={() => <RequireAuth component={SystemCandidates} />} />
+            <Route path="/system-gantt" component={() => <RequireAuth component={SystemGantt} />} />
+            <Route path="/documents" component={() => <RequireAuth component={Documents} />} />
+            <Route path="/systems" component={() => <RequireAuth component={Systems} />} />
+            <Route path="/divisions" component={() => <RequireAuth component={Divisions} />} />
+            <Route path="/departments" component={() => <RequireAuth component={Departments} />} />
+            <Route path="/users" component={() => <RequireAuth component={Users} />} />
+            <Route component={() => <div className="p-8">404 Not Found</div>} />
+          </Switch>
+        </MainLayout>
+      </Route>
+    </Switch>
   );
 }
 
@@ -66,10 +85,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
+        <AuthProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

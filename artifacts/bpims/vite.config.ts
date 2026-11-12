@@ -29,6 +29,8 @@ if (!basePath) {
 
 export default defineConfig({
   base: basePath,
+  // Load VITE_* from the monorepo root `.env`
+  envDir: path.resolve(import.meta.dirname, '..', '..'),
   plugins: [
     react(),
     tailwindcss(),
