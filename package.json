@@ -1,0 +1,16 @@
+{
+  "name": "gyoumuhearing",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @workspace/bpims run dev",
+    "dev:web": "pnpm --filter @workspace/bpims run dev",
+    "dev:api": "pnpm --filter @workspace/api-server run dev",
+    "dev:mockup": "pnpm --filter @workspace/mockup-sandbox run dev",
+    "typecheck": "tsc -b tsconfig.json"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0",
+    "typescript": "catalog:"
+  }
+}

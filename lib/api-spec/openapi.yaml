@@ -1,0 +1,3651 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Business Process Improvement Management System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: dashboard
+    description: Dashboard summary
+  - name: divisions
+    description: Division (organization unit) management
+  - name: departments
+    description: Department management
+  - name: users
+    description: User management
+  - name: processes
+    description: Business process management
+  - name: process-flows
+    description: Business process flow connections
+  - name: management-tasks
+    description: Management task grouping of business processes
+  - name: documents
+    description: Document management
+  - name: systems
+    description: System management
+  - name: hearings
+    description: Hearing management
+  - name: issues
+    description: Issue management
+  - name: improvements
+    description: Improvement project management
+  - name: system-candidates
+    description: System candidate management
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Dashboard ───────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getDashboardRecentActivity
+      tags: [dashboard]
+      summary: Get recently updated processes and hearing activity
+      responses:
+        "200":
+          description: Recent activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  # ─── Departments ─────────────────────────────────────────────────────────────
+  # ─── Divisions ────────────────────────────────────────────────────────────────
+  /divisions:
+    get:
+      operationId: listDivisions
+      tags: [divisions]
+      summary: List all divisions
+      parameters:
+        - name: isActive
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: List of divisions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Division"
+    post:
+      operationId: createDivision
+      tags: [divisions]
+      summary: Create a division
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DivisionInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Division"
+
+  /divisions/{id}:
+    get:
+      operationId: getDivision
+      tags: [divisions]
+      summary: Get a division by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Division
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Division"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDivision
+      tags: [divisions]
+      summary: Update a division
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DivisionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Division"
+    delete:
+      operationId: deleteDivision
+      tags: [divisions]
+      summary: Soft-delete (deactivate) a division
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /departments:
+    get:
+      operationId: listDepartments
+      tags: [departments]
+      summary: List all departments
+      parameters:
+        - name: parentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: divisionId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: isActive
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+    post:
+      operationId: createDepartment
+      tags: [departments]
+      summary: Create a department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  /departments/{id}:
+    get:
+      operationId: getDepartment
+      tags: [departments]
+      summary: Get a department by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Department
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateDepartment
+      tags: [departments]
+      summary: Update a department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+    delete:
+      operationId: deleteDepartment
+      tags: [departments]
+      summary: Soft-delete (deactivate) a department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /departments/tree:
+    get:
+      operationId: getDepartmentTree
+      tags: [departments]
+      summary: Get department hierarchy tree
+      responses:
+        "200":
+          description: Department tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentTreeNode"
+
+  # ─── Users ────────────────────────────────────────────────────────────────────
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: role
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── Processes ────────────────────────────────────────────────────────────────
+  /processes:
+    get:
+      operationId: listProcesses
+      tags: [processes]
+      summary: List processes
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: divisionId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: parentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: keyword
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of processes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Process"
+    post:
+      operationId: createProcess
+      tags: [processes]
+      summary: Create a process
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Process"
+
+  /processes/tree:
+    get:
+      operationId: getProcessTree
+      tags: [processes]
+      summary: Get full process hierarchy tree
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: divisionId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: rootId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Process tree
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProcessTreeNode"
+
+  /processes/{id}:
+    get:
+      operationId: getProcess
+      tags: [processes]
+      summary: Get a process by ID with full details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Process detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateProcess
+      tags: [processes]
+      summary: Update a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Process"
+    delete:
+      operationId: deleteProcess
+      tags: [processes]
+      summary: Soft-delete a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /processes/{id}/move:
+    patch:
+      operationId: moveProcess
+      tags: [processes]
+      summary: Move a process to a new parent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessMoveInput"
+      responses:
+        "200":
+          description: Moved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Process"
+
+  /processes/{id}/documents:
+    post:
+      operationId: linkProcessDocument
+      tags: [processes]
+      summary: Link an existing document to a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessDocumentLinkInput"
+      responses:
+        "201":
+          description: Linked
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+        "404":
+          description: Not found
+
+  /processes/{id}/documents/{documentId}:
+    delete:
+      operationId: unlinkProcessDocument
+      tags: [processes]
+      summary: Unlink a document from a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unlinked
+
+  /processes/{id}/systems:
+    post:
+      operationId: linkProcessSystem
+      tags: [processes]
+      summary: Link an existing system to a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessSystemLinkInput"
+      responses:
+        "201":
+          description: Linked
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SystemRecord"
+        "404":
+          description: Not found
+
+  /processes/{id}/systems/{systemId}:
+    delete:
+      operationId: unlinkProcessSystem
+      tags: [processes]
+      summary: Unlink a system from a process
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: systemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unlinked
+
+  # ─── Process Flows ────────────────────────────────────────────────────────────
+  /process-flows:
+    get:
+      operationId: listProcessFlows
+      tags: [process-flows]
+      summary: List process flows
+      parameters:
+        - name: processId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: List of process flows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProcessFlow"
+    post:
+      operationId: createProcessFlow
+      tags: [process-flows]
+      summary: Create a process flow connection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessFlowInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessFlow"
+
+  /process-flows/{id}:
+    patch:
+      operationId: updateProcessFlow
+      tags: [process-flows]
+      summary: Update a process flow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProcessFlowUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessFlow"
+    delete:
+      operationId: deleteProcessFlow
+      tags: [process-flows]
+      summary: Delete a process flow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── Management Tasks ────────────────────────────────────────────────────────
+  /management-tasks:
+    get:
+      operationId: listManagementTasks
+      tags: [management-tasks]
+      summary: List all management tasks
+      parameters:
+        - name: isActive
+          in: query
+          schema:
+            type: ["boolean", "null"]
+      responses:
+        "200":
+          description: List of management tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ManagementTask"
+    post:
+      operationId: createManagementTask
+      tags: [management-tasks]
+      summary: Create a management task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagementTaskInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagementTask"
+
+  /management-tasks/{id}:
+    get:
+      operationId: getManagementTask
+      tags: [management-tasks]
+      summary: Get a management task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Management task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagementTask"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateManagementTask
+      tags: [management-tasks]
+      summary: Update a management task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagementTaskUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagementTask"
+    delete:
+      operationId: deleteManagementTask
+      tags: [management-tasks]
+      summary: Soft-delete (deactivate) a management task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── Documents ────────────────────────────────────────────────────────────────
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List documents
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: keyword
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Document"
+    post:
+      operationId: createDocument
+      tags: [documents]
+      summary: Create a document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get document by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    patch:
+      operationId: updateDocument
+      tags: [documents]
+      summary: Update a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+    delete:
+      operationId: deleteDocument
+      tags: [documents]
+      summary: Delete a document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── Systems ──────────────────────────────────────────────────────────────────
+  /systems:
+    get:
+      operationId: listSystems
+      tags: [systems]
+      summary: List systems
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: keyword
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of systems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SystemRecord"
+    post:
+      operationId: createSystem
+      tags: [systems]
+      summary: Create a system record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemRecord"
+
+  /systems/{id}:
+    get:
+      operationId: getSystem
+      tags: [systems]
+      summary: Get system by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: System
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemRecord"
+    patch:
+      operationId: updateSystem
+      tags: [systems]
+      summary: Update a system
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemRecord"
+    delete:
+      operationId: deleteSystem
+      tags: [systems]
+      summary: Delete a system
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── Hearings ─────────────────────────────────────────────────────────────────
+  /hearings:
+    get:
+      operationId: listHearings
+      tags: [hearings]
+      summary: List hearings
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: processId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: fromDate
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: toDate
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of hearings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hearing"
+    post:
+      operationId: createHearing
+      tags: [hearings]
+      summary: Create a hearing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+
+  /hearings/board:
+    get:
+      operationId: getHearingBoard
+      tags: [hearings]
+      summary: Get hearings grouped by status for kanban board
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Hearings grouped by status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HearingBoard"
+
+  /hearings/calendar:
+    get:
+      operationId: getHearingCalendar
+      tags: [hearings]
+      summary: Get hearings for calendar view
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hearings for calendar
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hearing"
+
+  /hearings/{id}:
+    get:
+      operationId: getHearing
+      tags: [hearings]
+      summary: Get a hearing by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hearing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+    patch:
+      operationId: updateHearing
+      tags: [hearings]
+      summary: Update a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+    delete:
+      operationId: deleteHearing
+      tags: [hearings]
+      summary: Delete a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /hearings/{id}/status:
+    patch:
+      operationId: updateHearingStatus
+      tags: [hearings]
+      summary: Update hearing status (for board drag-and-drop)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingStatusUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hearing"
+
+  /hearings/{id}/documents:
+    post:
+      operationId: linkHearingDocument
+      tags: [hearings]
+      summary: Link an existing document to a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingDocumentLinkInput"
+      responses:
+        "201":
+          description: Linked
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DocumentRef"
+        "404":
+          description: Not found
+
+  /hearings/{id}/documents/{documentId}:
+    delete:
+      operationId: unlinkHearingDocument
+      tags: [hearings]
+      summary: Unlink a document from a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unlinked
+
+  /hearings/{id}/systems:
+    post:
+      operationId: linkHearingSystem
+      tags: [hearings]
+      summary: Link an existing system to a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HearingSystemLinkInput"
+      responses:
+        "201":
+          description: Linked
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SystemRef"
+        "404":
+          description: Not found
+
+  /hearings/{id}/systems/{systemId}:
+    delete:
+      operationId: unlinkHearingSystem
+      tags: [hearings]
+      summary: Unlink a system from a hearing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: systemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Unlinked
+
+  # ─── Issues ───────────────────────────────────────────────────────────────────
+  /issues:
+    get:
+      operationId: listIssues
+      tags: [issues]
+      summary: List issues
+      parameters:
+        - name: processId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: divisionId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: hearingId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: parentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: priority
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: category
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of issues
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Issue"
+    post:
+      operationId: createIssue
+      tags: [issues]
+      summary: Create an issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+
+  /issues/{id}:
+    get:
+      operationId: getIssue
+      tags: [issues]
+      summary: Get an issue by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Issue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+    patch:
+      operationId: updateIssue
+      tags: [issues]
+      summary: Update an issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+    delete:
+      operationId: deleteIssue
+      tags: [issues]
+      summary: Delete an issue
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  /issues/{id}/move:
+    patch:
+      operationId: moveIssue
+      tags: [issues]
+      summary: Move a task to a new parent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueMoveInput"
+      responses:
+        "200":
+          description: Moved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Issue"
+
+  # ─── Improvements ─────────────────────────────────────────────────────────────
+  /improvements:
+    get:
+      operationId: listImprovements
+      tags: [improvements]
+      summary: List improvement projects
+      parameters:
+        - name: processId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: method
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: priority
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of improvements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Improvement"
+    post:
+      operationId: createImprovement
+      tags: [improvements]
+      summary: Create an improvement project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImprovementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Improvement"
+
+  /improvements/summary:
+    get:
+      operationId: getImprovementSummary
+      tags: [improvements]
+      summary: Get improvement projects grouped by status and method
+      responses:
+        "200":
+          description: Improvement summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImprovementSummary"
+
+  /improvements/{id}:
+    get:
+      operationId: getImprovement
+      tags: [improvements]
+      summary: Get improvement by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Improvement
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Improvement"
+    patch:
+      operationId: updateImprovement
+      tags: [improvements]
+      summary: Update an improvement project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImprovementUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Improvement"
+    delete:
+      operationId: deleteImprovement
+      tags: [improvements]
+      summary: Delete an improvement project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+  # ─── System Candidates ────────────────────────────────────────────────────────
+  /system-candidates:
+    get:
+      operationId: listSystemCandidates
+      tags: [system-candidates]
+      summary: List system candidates
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: ["string", "null"]
+        - name: priority
+          in: query
+          schema:
+            type: ["string", "null"]
+      responses:
+        "200":
+          description: List of system candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SystemCandidate"
+    post:
+      operationId: createSystemCandidate
+      tags: [system-candidates]
+      summary: Create a system candidate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemCandidateInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemCandidate"
+
+  /system-candidates/{id}:
+    get:
+      operationId: getSystemCandidate
+      tags: [system-candidates]
+      summary: Get system candidate by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: System candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemCandidate"
+    patch:
+      operationId: updateSystemCandidate
+      tags: [system-candidates]
+      summary: Update a system candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SystemCandidateUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemCandidate"
+    delete:
+      operationId: deleteSystemCandidate
+      tags: [system-candidates]
+      summary: Delete a system candidate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    # ─── Dashboard ──────────────────────────────────────────────────────────────
+    DashboardSummary:
+      type: object
+      required:
+        - totalDepartments
+        - hearingTargetDepts
+        - hearingCompletedDepts
+        - pendingDepts
+        - totalProcesses
+        - confirmedProcesses
+        - totalIssues
+        - totalImprovements
+        - systemCandidates
+        - overdueCount
+        - upcomingHearings
+        - processStatusBreakdown
+        - improvementStatusBreakdown
+        - improvementMethodBreakdown
+        - issuePriorityBreakdown
+        - departmentHearingProgress
+      properties:
+        totalDepartments:
+          type: integer
+        hearingTargetDepts:
+          type: integer
+        hearingCompletedDepts:
+          type: integer
+        pendingDepts:
+          type: integer
+        totalProcesses:
+          type: integer
+        confirmedProcesses:
+          type: integer
+        totalIssues:
+          type: integer
+        totalImprovements:
+          type: integer
+        systemCandidates:
+          type: integer
+        overdueCount:
+          type: integer
+        upcomingHearings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hearing"
+        processStatusBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        improvementStatusBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        improvementMethodBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        issuePriorityBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        departmentHearingProgress:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeptHearingProgress"
+
+    StatusCount:
+      type: object
+      required: [label, count]
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+
+    DeptHearingProgress:
+      type: object
+      required: [departmentId, departmentName, total, completed, inProgress, notStarted]
+      properties:
+        departmentId:
+          type: integer
+        departmentName:
+          type: string
+        total:
+          type: integer
+        completed:
+          type: integer
+        inProgress:
+          type: integer
+        notStarted:
+          type: integer
+
+    ActivityItem:
+      type: object
+      required: [id, type, title, action, timestamp]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        title:
+          type: string
+        action:
+          type: string
+        timestamp:
+          type: string
+        departmentName:
+          type: ["string", "null"]
+        userName:
+          type: ["string", "null"]
+
+    # ─── Division ───────────────────────────────────────────────────────────────
+    Division:
+      type: object
+      required: [id, name, isActive, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        departmentCount:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DivisionInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    DivisionUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    # ─── Department ─────────────────────────────────────────────────────────────
+    Department:
+      type: object
+      required: [id, name, isActive, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+        parentId:
+          type: ["integer", "null"]
+        divisionId:
+          type: ["integer", "null"]
+        divisionName:
+          type: ["string", "null"]
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        managerId:
+          type: ["integer", "null"]
+        managerName:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        processCount:
+          type: ["integer", "null"]
+        hearingCount:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DivisionRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    DepartmentRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    ProcessRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    HearingRef:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+
+    DocumentRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    SystemRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    ImprovementRef:
+      type: object
+      required: [id, title]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+
+    ManagementTaskRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    # ─── Management Task ─────────────────────────────────────────────────────────
+    ManagementTask:
+      type: object
+      required: [id, name, isActive, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        processes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessRef"
+        processCount:
+          type: ["integer", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartmentRef"
+        relatedDepartments:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ManagementTaskInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        processIds:
+          type: array
+          items:
+            type: integer
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+
+    ManagementTaskUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        processIds:
+          type: array
+          items:
+            type: integer
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+
+    DepartmentInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        managerId:
+          type: ["integer", "null"]
+        description:
+          type: string
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    DepartmentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+        parentId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        managerId:
+          type: ["integer", "null"]
+        description:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    DepartmentTreeNode:
+      type: object
+      required: [id, name, isActive, sortOrder, children]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: ["string", "null"]
+        parentId:
+          type: ["integer", "null"]
+        isActive:
+          type: boolean
+        sortOrder:
+          type: integer
+        processCount:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/DepartmentTreeNode"
+
+    # ─── User ────────────────────────────────────────────────────────────────────
+    User:
+      type: object
+      required: [id, name, email, role, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, manager, supervisor, staff, viewer]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    UserInput:
+      type: object
+      required: [name, email, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        role:
+          type: string
+          enum: [admin, manager, supervisor, staff, viewer]
+        isActive:
+          type: boolean
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        role:
+          type: string
+          enum: [admin, manager, supervisor, staff, viewer]
+        isActive:
+          type: boolean
+
+    # ─── Process ─────────────────────────────────────────────────────────────────
+    Process:
+      type: object
+      required: [id, name, status, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        parentName:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        relatedDepartments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        managementTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManagementTaskRef"
+        ownerName:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [draft, improving, confirmed, discontinued]
+        frequency:
+          type: ["string", "null"]
+        duration:
+          type: ["string", "null"]
+        trigger:
+          type: ["string", "null"]
+        completionCondition:
+          type: ["string", "null"]
+        deliverable:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        childCount:
+          type: integer
+        issueCount:
+          type: integer
+        improvementCount:
+          type: integer
+        documentCount:
+          type: integer
+        systemCount:
+          type: integer
+        hearingCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ProcessDetail:
+      type: object
+      required: [id, name, status, sortOrder, createdAt, updatedAt, childCount, issueCount, improvementCount, documentCount, systemCount, children, stakeholders, documents, systems, issues, improvements, hearings, predecessors, successors]
+      properties:
+        childCount:
+          type: integer
+        issueCount:
+          type: integer
+        improvementCount:
+          type: integer
+        documentCount:
+          type: integer
+        systemCount:
+          type: integer
+        hearingCount:
+          type: integer
+        id:
+          type: integer
+        name:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        parentName:
+          type: ["string", "null"]
+        overview:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        relatedDepartments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        managementTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManagementTaskRef"
+        ownerName:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        status:
+          type: string
+        frequency:
+          type: ["string", "null"]
+        duration:
+          type: ["string", "null"]
+        trigger:
+          type: ["string", "null"]
+        completionCondition:
+          type: ["string", "null"]
+        deliverable:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/Process"
+        stakeholders:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessStakeholder"
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Document"
+        systems:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemRecord"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/Issue"
+        improvements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Improvement"
+        hearings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hearing"
+        predecessors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessFlow"
+        successors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessFlow"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ProcessDepartmentRef:
+      type: object
+      required: [id, name, divisionNames]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        divisionNames:
+          type: array
+          items:
+            type: string
+
+    ProcessStakeholder:
+      type: object
+      required: [id, processId, userId, role]
+      properties:
+        id:
+          type: integer
+        processId:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: string
+        departmentName:
+          type: ["string", "null"]
+        role:
+          type: string
+
+    ProcessInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        overview:
+          type: string
+        purpose:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        managementTaskIds:
+          type: array
+          items:
+            type: integer
+        ownerName:
+          type: ["string", "null"]
+        category:
+          type: string
+        status:
+          type: string
+        frequency:
+          type: string
+        duration:
+          type: string
+        trigger:
+          type: string
+        completionCondition:
+          type: string
+        deliverable:
+          type: string
+        sortOrder:
+          type: integer
+
+    ProcessUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        overview:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        managementTaskIds:
+          type: array
+          items:
+            type: integer
+        ownerName:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        status:
+          type: string
+        frequency:
+          type: ["string", "null"]
+        duration:
+          type: ["string", "null"]
+        trigger:
+          type: ["string", "null"]
+        completionCondition:
+          type: ["string", "null"]
+        deliverable:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+
+    ProcessMoveInput:
+      type: object
+      properties:
+        newParentId:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+
+    ProcessDocumentLinkInput:
+      type: object
+      required: [documentId]
+      properties:
+        documentId:
+          type: integer
+
+    ProcessSystemLinkInput:
+      type: object
+      required: [systemId]
+      properties:
+        systemId:
+          type: integer
+
+    HearingDocumentLinkInput:
+      type: object
+      required: [documentId]
+      properties:
+        documentId:
+          type: integer
+
+    HearingSystemLinkInput:
+      type: object
+      required: [systemId]
+      properties:
+        systemId:
+          type: integer
+
+    ProcessTreeNode:
+      type: object
+      required: [id, name, status, sortOrder, children]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        ownerName:
+          type: ["string", "null"]
+        status:
+          type: string
+        category:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        childCount:
+          type: integer
+        issueCount:
+          type: integer
+        improvementCount:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessTreeNode"
+
+    # ─── Process Flow ────────────────────────────────────────────────────────────
+    ProcessFlow:
+      type: object
+      required: [id, fromProcessId, toProcessId, createdAt]
+      properties:
+        id:
+          type: integer
+        fromProcessId:
+          type: integer
+        fromProcessName:
+          type: ["string", "null"]
+        toProcessId:
+          type: integer
+        toProcessName:
+          type: ["string", "null"]
+        condition:
+          type: ["string", "null"]
+        handoverInfo:
+          type: ["string", "null"]
+        fromDepartmentId:
+          type: ["integer", "null"]
+        toDepartmentId:
+          type: ["integer", "null"]
+        isRequired:
+          type: boolean
+        isException:
+          type: boolean
+        description:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ProcessFlowInput:
+      type: object
+      required: [fromProcessId, toProcessId]
+      properties:
+        fromProcessId:
+          type: integer
+        toProcessId:
+          type: integer
+        condition:
+          type: string
+        handoverInfo:
+          type: string
+        fromDepartmentId:
+          type: ["integer", "null"]
+        toDepartmentId:
+          type: ["integer", "null"]
+        isRequired:
+          type: boolean
+        isException:
+          type: boolean
+        description:
+          type: string
+
+    ProcessFlowUpdate:
+      type: object
+      properties:
+        condition:
+          type: ["string", "null"]
+        handoverInfo:
+          type: ["string", "null"]
+        isRequired:
+          type: boolean
+        isException:
+          type: boolean
+        description:
+          type: ["string", "null"]
+
+    # ─── Document ────────────────────────────────────────────────────────────────
+    Document:
+      type: object
+      required: [id, name, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        docType:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        relatedDepartments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisionName:
+          type: ["string", "null"]
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        hasPersonalInfo:
+          type: boolean
+        isActive:
+          type: boolean
+        needsImprovement:
+          type: boolean
+        notes:
+          type: ["string", "null"]
+        processCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    DocumentInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        docType:
+          type: string
+        location:
+          type: string
+        url:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        hasPersonalInfo:
+          type: boolean
+        isActive:
+          type: boolean
+        needsImprovement:
+          type: boolean
+        notes:
+          type: string
+
+    DocumentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        docType:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        hasPersonalInfo:
+          type: boolean
+        isActive:
+          type: boolean
+        needsImprovement:
+          type: boolean
+        notes:
+          type: ["string", "null"]
+
+    # ─── System ──────────────────────────────────────────────────────────────────
+    SystemRecord:
+      type: object
+      required: [id, name, isActive, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        systemType:
+          type: ["string", "null"]
+        vendor:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        monthlyFee:
+          type: ["number", "null"]
+        annualFee:
+          type: ["number", "null"]
+        contractUntil:
+          type: ["string", "null"]
+        accountCount:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        relatedDepartments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        divisionName:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        isBeingDiscontinued:
+          type: boolean
+        issues:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        processCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    SystemInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        systemType:
+          type: string
+        vendor:
+          type: string
+        url:
+          type: string
+        monthlyFee:
+          type: ["number", "null"]
+        annualFee:
+          type: ["number", "null"]
+        contractUntil:
+          type: ["string", "null"]
+        accountCount:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        isActive:
+          type: boolean
+        isBeingDiscontinued:
+          type: boolean
+        issues:
+          type: string
+        notes:
+          type: string
+
+    SystemUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        systemType:
+          type: ["string", "null"]
+        vendor:
+          type: ["string", "null"]
+        url:
+          type: ["string", "null"]
+        monthlyFee:
+          type: ["number", "null"]
+        annualFee:
+          type: ["number", "null"]
+        contractUntil:
+          type: ["string", "null"]
+        accountCount:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        relatedDepartmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        isActive:
+          type: boolean
+        isBeingDiscontinued:
+          type: boolean
+        issues:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+
+    # ─── Hearing ─────────────────────────────────────────────────────────────────
+    Hearing:
+      type: object
+      required: [id, title, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        improvements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImprovementRef"
+        documents:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentRef"
+        systems:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemRef"
+        processId:
+          type: ["integer", "null"]
+        processName:
+          type: ["string", "null"]
+        intervieweeId:
+          type: ["integer", "null"]
+        intervieweeName:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        format:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        conductedAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        location:
+          type: ["string", "null"]
+        meetingUrl:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        questions:
+          type: ["string", "null"]
+        answers:
+          type: ["string", "null"]
+        decisions:
+          type: ["string", "null"]
+        pendingItems:
+          type: ["string", "null"]
+        nextItems:
+          type: ["string", "null"]
+        nextScheduledAt:
+          type: ["string", "null"]
+        nextHearingId:
+          type: ["integer", "null"]
+        nextHearing:
+          $ref: "#/components/schemas/HearingRef"
+        previousHearing:
+          $ref: "#/components/schemas/HearingRef"
+        status:
+          type: string
+          enum: [not_started, conducted]
+        priority:
+          type: ["string", "null"]
+        boardSortOrder:
+          type: integer
+        listSortOrder:
+          type: integer
+        pendingCount:
+          type: integer
+        isOverdue:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    HearingInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        processId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        intervieweeName:
+          type: string
+        assigneeName:
+          type: string
+        format:
+          type: string
+        scheduledAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        location:
+          type: string
+        meetingUrl:
+          type: string
+        purpose:
+          type: string
+        questions:
+          type: string
+        answers:
+          type: string
+        decisions:
+          type: string
+        pendingItems:
+          type: string
+        nextItems:
+          type: string
+        nextScheduledAt:
+          type: ["string", "null"]
+        nextHearingId:
+          type: ["integer", "null"]
+        priority:
+          type: string
+        status:
+          type: string
+        improvementIds:
+          type: array
+          items:
+            type: integer
+
+    HearingUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        processId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        intervieweeName:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        format:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+        conductedAt:
+          type: ["string", "null"]
+        durationMinutes:
+          type: ["integer", "null"]
+        location:
+          type: ["string", "null"]
+        meetingUrl:
+          type: ["string", "null"]
+        purpose:
+          type: ["string", "null"]
+        questions:
+          type: ["string", "null"]
+        answers:
+          type: ["string", "null"]
+        decisions:
+          type: ["string", "null"]
+        pendingItems:
+          type: ["string", "null"]
+        nextItems:
+          type: ["string", "null"]
+        nextScheduledAt:
+          type: ["string", "null"]
+        nextHearingId:
+          type: ["integer", "null"]
+        status:
+          type: string
+        priority:
+          type: ["string", "null"]
+        boardSortOrder:
+          type: integer
+        listSortOrder:
+          type: integer
+        improvementIds:
+          type: array
+          items:
+            type: integer
+
+    HearingStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    HearingBoard:
+      type: object
+      required: [not_started, conducted]
+      properties:
+        not_started:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hearing"
+        conducted:
+          type: array
+          items:
+            $ref: "#/components/schemas/Hearing"
+
+    # ─── Issue ───────────────────────────────────────────────────────────────────
+    Issue:
+      type: object
+      required: [id, title, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+        processId:
+          type: ["integer", "null"]
+        processName:
+          type: ["string", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        departments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessDepartmentRef"
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        hearings:
+          type: array
+          items:
+            $ref: "#/components/schemas/HearingRef"
+        improvements:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImprovementRef"
+        content:
+          type: ["string", "null"]
+        cause:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        frequency:
+          type: ["string", "null"]
+        impactScope:
+          type: ["string", "null"]
+        impactContent:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        urgency:
+          type: ["string", "null"]
+        importance:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [not_started, in_progress, resolved, on_hold]
+        boardSortOrder:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    IssueInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+        processId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        hearingIds:
+          type: array
+          items:
+            type: integer
+        improvementIds:
+          type: array
+          items:
+            type: integer
+        content:
+          type: string
+        cause:
+          type: string
+        category:
+          type: string
+        frequency:
+          type: string
+        impactScope:
+          type: string
+        impactContent:
+          type: string
+        priority:
+          type: string
+        urgency:
+          type: string
+        importance:
+          type: string
+        ownerName:
+          type: string
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+
+    IssueUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+        processId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentIds:
+          type: array
+          items:
+            type: integer
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        hearingIds:
+          type: array
+          items:
+            type: integer
+        improvementIds:
+          type: array
+          items:
+            type: integer
+        content:
+          type: ["string", "null"]
+        cause:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        frequency:
+          type: ["string", "null"]
+        impactScope:
+          type: ["string", "null"]
+        impactContent:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        urgency:
+          type: ["string", "null"]
+        importance:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        boardSortOrder:
+          type: integer
+
+    IssueMoveInput:
+      type: object
+      properties:
+        newParentId:
+          type: ["integer", "null"]
+        sortOrder:
+          type: integer
+
+    # ─── Improvement ─────────────────────────────────────────────────────────────
+    Improvement:
+      type: object
+      required: [id, title, status, sortOrder, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        processId:
+          type: ["integer", "null"]
+        processName:
+          type: ["string", "null"]
+        issueId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        divisionName:
+          type: ["string", "null"]
+        divisions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DivisionRef"
+        purpose:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+        method:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        actualStartDate:
+          type: ["string", "null"]
+        actualEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [not_started, in_progress, completed, on_hold]
+        progress:
+          type: ["integer", "null"]
+        expectedEffect:
+          type: ["string", "null"]
+        actualEffect:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+        isOverdue:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ImprovementInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        processId:
+          type: ["integer", "null"]
+        issueId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        purpose:
+          type: string
+        content:
+          type: string
+        method:
+          type: string
+        ownerName:
+          type: string
+        assigneeName:
+          type: string
+        priority:
+          type: string
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        progress:
+          type: ["integer", "null"]
+        expectedEffect:
+          type: string
+        notes:
+          type: string
+        sortOrder:
+          type: integer
+
+    ImprovementUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        processId:
+          type: ["integer", "null"]
+        issueId:
+          type: ["integer", "null"]
+        departmentId:
+          type: ["integer", "null"]
+        divisionIds:
+          type: array
+          items:
+            type: integer
+        purpose:
+          type: ["string", "null"]
+        content:
+          type: ["string", "null"]
+        method:
+          type: ["string", "null"]
+        ownerName:
+          type: ["string", "null"]
+        assigneeName:
+          type: ["string", "null"]
+        priority:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        actualStartDate:
+          type: ["string", "null"]
+        actualEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        progress:
+          type: ["integer", "null"]
+        expectedEffect:
+          type: ["string", "null"]
+        actualEffect:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        sortOrder:
+          type: integer
+
+    ImprovementSummary:
+      type: object
+      required: [byStatus, byMethod, total, overdue]
+      properties:
+        total:
+          type: integer
+        overdue:
+          type: integer
+        byStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        byMethod:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+
+    # ─── System Candidate ────────────────────────────────────────────────────────
+    SystemCandidateLink:
+      type: object
+      required: [id, name, url]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        url:
+          type: string
+
+    SystemCandidateLinkInput:
+      type: object
+      required: [name, url]
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+
+    SystemCandidate:
+      type: object
+      required: [id, title, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        improvementId:
+          type: ["integer", "null"]
+        improvementTitle:
+          type: ["string", "null"]
+        processId:
+          type: ["integer", "null"]
+        processName:
+          type: ["string", "null"]
+        targetUsers:
+          type: ["string", "null"]
+        problemToSolve:
+          type: ["string", "null"]
+        currentFlow:
+          type: ["string", "null"]
+        improvedFlow:
+          type: ["string", "null"]
+        requiredFeatures:
+          type: ["string", "null"]
+        connectedSystems:
+          type: ["string", "null"]
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemCandidateLink"
+        hasPersonalInfo:
+          type: boolean
+        priority:
+          type: ["string", "null"]
+        estimatedUsers:
+          type: ["integer", "null"]
+        developerId:
+          type: ["integer", "null"]
+        ownerName:
+          type: ["string", "null"]
+        developerName:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [candidate, requirements, investigating, pending_decision, planned, in_development, testing, released, cancelled]
+        progress:
+          type: ["integer", "null"]
+        boardSortOrder:
+          type: integer
+        listSortOrder:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    SystemCandidateInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        improvementId:
+          type: ["integer", "null"]
+        processId:
+          type: ["integer", "null"]
+        targetUsers:
+          type: string
+        problemToSolve:
+          type: string
+        currentFlow:
+          type: string
+        improvedFlow:
+          type: string
+        requiredFeatures:
+          type: string
+        connectedSystems:
+          type: string
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemCandidateLinkInput"
+        hasPersonalInfo:
+          type: boolean
+        priority:
+          type: string
+        estimatedUsers:
+          type: ["integer", "null"]
+        developerId:
+          type: ["integer", "null"]
+        ownerName:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        progress:
+          type: ["integer", "null"]
+
+    SystemCandidateUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        parentId:
+          type: ["integer", "null"]
+        improvementId:
+          type: ["integer", "null"]
+        processId:
+          type: ["integer", "null"]
+        targetUsers:
+          type: ["string", "null"]
+        problemToSolve:
+          type: ["string", "null"]
+        currentFlow:
+          type: ["string", "null"]
+        improvedFlow:
+          type: ["string", "null"]
+        requiredFeatures:
+          type: ["string", "null"]
+        connectedSystems:
+          type: ["string", "null"]
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/SystemCandidateLinkInput"
+        hasPersonalInfo:
+          type: boolean
+        priority:
+          type: ["string", "null"]
+        estimatedUsers:
+          type: ["integer", "null"]
+        developerId:
+          type: ["integer", "null"]
+        ownerName:
+          type: ["string", "null"]
+        plannedStartDate:
+          type: ["string", "null"]
+        plannedEndDate:
+          type: ["string", "null"]
+        status:
+          type: string
+        progress:
+          type: ["integer", "null"]
+        boardSortOrder:
+          type: integer
+        listSortOrder:
+          type: integer
