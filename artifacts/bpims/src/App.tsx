@@ -2,8 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, Redirect } from 'wouter';
-import type { ComponentType } from 'react';
-
+import { useState, type ComponentType } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import LoginPage from '@/pages/login';
@@ -26,14 +25,30 @@ import Departments from '@/pages/departments';
 import Divisions from '@/pages/divisions';
 import Users from '@/pages/users';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
+function getErrorStatus(error: unknown): number | null {
+  if (error && typeof error === 'object' && 'status' in error && typeof (error as { status: unknown }).status === 'number') {
+    return (error as { status: number }).status;
+  }
+  return null;
+}
+
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Avoid treating a one-off auth/network blip as a permanent empty list.
+        retry: (count, error) => {
+          const status = getErrorStatus(error);
+          if (status === 401 || status === 403) return count < 2;
+          return count < 1;
+        },
+        retryDelay: (attempt) => Math.min(500 * 2 ** attempt, 2000),
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+      },
     },
-  },
-});
+  });
+}
 
 function RequireAuth({ component: Component }: { component: ComponentType }) {
   const { ready, session, configured } = useAuth();
@@ -82,6 +97,8 @@ function Router() {
 }
 
 function App() {
+  const [queryClient] = useState(createQueryClient);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

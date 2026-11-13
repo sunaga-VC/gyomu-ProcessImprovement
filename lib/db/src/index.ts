@@ -25,6 +25,10 @@ if (isSupabase) {
 export const pool = new Pool({
   connectionString,
   ssl: isSupabase ? { rejectUnauthorized: false } : undefined,
+  // Serverless: keep the pool tiny so cold starts don't open many connections.
+  max: isSupabase ? 1 : 10,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 15_000,
 });
 export const db = drizzle(pool, { schema });
 

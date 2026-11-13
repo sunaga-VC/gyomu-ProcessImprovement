@@ -4,10 +4,26 @@ import { Target, Activity, AlertCircle, TrendingUp, CheckCircle2 } from "lucide-
 import { format } from "date-fns";
 
 export default function Dashboard() {
-  const { data: summary, isLoading: isSummaryLoading } = useGetDashboardSummary();
-  const { data: activity, isLoading: isActivityLoading } = useGetDashboardRecentActivity();
+  const { data: summary, isLoading: isSummaryLoading, isError: summaryError, error: summaryErr, refetch: refetchSummary } = useGetDashboardSummary();
+  const { data: activity, isLoading: isActivityLoading, isError: activityError, refetch: refetchActivity } = useGetDashboardRecentActivity();
 
   if (isSummaryLoading || isActivityLoading) return <div className="p-8 text-muted-foreground">読み込み中...</div>;
+
+  if (summaryError || activityError) {
+    return (
+      <div className="p-8 space-y-3">
+        <p className="text-sm text-red-600">データの取得に失敗しました。通信またはログイン状態をご確認ください。</p>
+        <p className="text-xs text-slate-500">{summaryErr instanceof Error ? summaryErr.message : null}</p>
+        <button
+          type="button"
+          className="text-sm underline text-slate-700"
+          onClick={() => { void refetchSummary(); void refetchActivity(); }}
+        >
+          再読み込み
+        </button>
+      </div>
+    );
+  }
 
   const improvingProcesses = summary?.processStatusBreakdown?.find(s => s.label === "improving")?.count ?? 0;
 
